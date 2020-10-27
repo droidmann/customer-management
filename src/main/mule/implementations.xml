@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="cc46cb11-7a61-4b6d-8337-b8f27d6b8d2c" />
+	<flow name="addCustomer" doc:id="ecbb7ccc-2799-46b2-b0b4-57e78d2c6518" >
+		<ee:transform doc:name="Transform Message" doc:id="78e3aee9-15d9-411c-b91e-1c2f46072b79" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="isExist" ><![CDATA[%dw 2.0
+output application/java
+import java!com::cms::dartech::MyUtils
+---
+MyUtils::fileExist("C:\\Dev\\mule_4_workspace\\tests\\src\\main\\resources\\testing\\Customers-QA.csv")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="de57f805-6dd4-454c-852e-348028a6f122" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="5326877f-71ed-456e-b0a0-0b2ec58c69eb" >
+			<when expression="#[vars.isExist == true]">
+				<ee:transform doc:name="Transform Message" doc:id="8061fb45-6ff2-4e65-a17f-f41434261be6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv header=false
+var clientkey = now() as String {format: "yyyyMMddHHmmssSSSSs"}
+var curdate = now() as DateTime {format: "yyyy-MM-ddThh:mm:ss.000Z"} as Number
+var birthDate = payload.birthDate as String {format: "yyyy-MM-dd"} ++ "T00:00:00"
+var uniqueId = uuid() replace "-" with ""
+---
+{
+	'Client Key' : "CM" ++ clientkey ++ uniqueId[1 to 5],
+	'First Name': payload.firstName,
+	'Middle Name': payload.middleName default "",
+	'Last Name': payload.lastName,
+	'BirthDate': birthDate as DateTime as Number,
+	'Height': payload.height default "",
+	'Weight': payload.weight default "",
+	'Billing Street': payload.billingStreet default "",
+	'Billing City': payload.billingCity,
+	'Billing State': payload.billingState,
+	'Billing Postal Code': payload.billingPostalCode,
+	'Billing Country': payload.billingCountry,
+	'Created Date': curdate
+	
+	
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="6b0c927f-6c09-43ea-b129-700feb2a47dd" />
+				<file:write doc:name="Write" doc:id="f9fe28da-5ab5-455b-b31a-5fa232eb8b91" config-ref="File_Config" path="${file.path}" mode="APPEND"/>
+				<ee:transform doc:name="Transform Message" doc:id="335f25e4-d70e-4c29-bc01-4f0b78680fe9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{clientKey: payload[0].column_0}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="0f0a2b74-c708-4d50-9f1c-a05134773d03" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv 
+var clientkey = now() as String {format: "yyyyMMddHHmmssSSSSs"}
+var curdate = now() as DateTime {format: "yyyy-MM-ddThh:mm:ss.000Z"} as Number
+var birthDate = payload.birthDate as String {format: "yyyy-MM-dd"} ++ "T00:00:00"
+var uniqueId = uuid() replace "-" with ""
+---
+{
+	'Client Key' : "CM" ++ clientkey ++ uniqueId[1 to 5]  ,
+	'First Name': payload.firstName,
+	'Middle Name': payload.middleName default "",
+	'Last Name': payload.lastName,
+	'BirthDate': birthDate as DateTime as Number,
+	'Height': payload.height,
+	'Weight': payload.weight,
+	'Billing Street': payload.billingStreet,
+	'Billing City': payload.billingCity,
+	'Billing State': payload.billingState,
+	'Billing Postal Code': payload.billingPostalCode,
+	'Billing Country': payload.billingCountry,
+	'Created Date': curdate
+	
+	
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="94e89639-ebb5-4ee7-8297-0407eef63d46" />
+				<file:write doc:name="Write" doc:id="4cb4beb1-1440-4fc6-884a-38a574d81a1e" config-ref="File_Config" path="${file.path}" mode="APPEND"/>
+				<ee:transform doc:name="Transform Message" doc:id="eb8adab1-a14b-4b21-8c01-c08cc758def5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{clientKey: payload[0]."Client Key"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="allCustomers" doc:id="8abfe84a-7c44-45cf-ab15-c8a7c687de10" >
+		<file:read doc:name="Read" doc:id="906d6f71-550e-4325-84aa-d64664833736" config-ref="File_Config" path="${file.path}"/>
+		<ee:transform doc:name="Transform Message" doc:id="d248bae1-9f7b-43c5-959c-716a3590d198" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv header=false
+
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="b6de8b9d-4aa3-4532-a0fe-9abcef0f0258" >
+			<when expression="#[payload == []]">
+				<ee:transform doc:name="Transform Message" doc:id="0c4d4771-50d8-45ea-bba6-24c3e827a2b8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "No Client Found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="27891feb-d9bf-4d32-a409-401c55ea58b3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+//var payl = readUrl("classpath://testing/Customers-QA.csv", "application/csv")
+---
+{
+   customers: payload map ((customer, indexOfCustomer) -> {
+   	 clientKey: customer.column_0,
+   	 firstName: customer.column_1,
+   	 middleName: customer.column_2,
+   	 lastName: customer.column_3,
+   	 //size: sizeOf(payload)
+     birthDate: customer.column_4 as Number as DateTime as Date {format: "dd.MM.yyyy"} default "",
+     height: customer.column_5 default "",
+     weight: customer.column_6 default "",
+     billingAddress: customer.column_7 ++ "," ++ customer.column_8 ++ "," ++ customer.column_9 ++ "," ++
+      customer.column_10 ++ "," ++ customer.column_11 ,
+     createdDate: customer.column_12 as Number as DateTime as Date {format: "dd.MM.yyyy"} default ""
+
+}),
+totalRecords: sizeOf(payload)
+
+}
+]]></ee:set-payload>
+			</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+					</ee:variables>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="removeCustomer" doc:id="deff313d-7f85-4009-8ac7-c49100a0ffc4" >
+		<set-variable value="#[attributes.queryParams.clientKey]" doc:name="clientKey" doc:id="96a8f202-8b6e-40fb-8b98-4e9f8e14675b" variableName="clientKey"/>
+		<file:read doc:name="Read CSV" doc:id="f6bdb1bf-9b4e-40d3-b47b-d0db580faa67" config-ref="File_Config" path="${file.path}"/>
+		<ee:transform doc:name="Transform Message" doc:id="caee0049-3bd5-4313-b121-a5e84fd5c92b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv header=false
+
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="37dc7e45-b389-4614-af53-69be2163760d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="availableClientKey" ><![CDATA[%dw 2.0
+output application/java
+---
+payload map $ filter ($.column_0 == vars.clientKey)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="3f8b029a-a066-4800-baec-ac342b414e11" >
+			<when expression="#[vars.availableClientKey != []]">
+				<ee:transform doc:name="Transform Message" doc:id="45589b56-4c54-4d78-b2fd-cf4bc806aecd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map $ filter ($.column_0 != vars.clientKey)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="b9afc5d1-6e0d-42ff-8e22-0c9ef71b74f4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+
+---
+
+   payload map ((customer, indexOfCustomer) -> {
+   	 'Client Key': customer.column_0,
+   	 'First Name': customer.column_1,
+   	 'Middle Name': customer.column_2,
+   	 'Last Name': customer.column_3,
+   	 'BirthDate': customer.column_4 ,
+     'Height': customer.column_5 default "",
+     'Weight': customer.column_6 default "",
+     'Billing Street': customer.column_7 default "",
+     'Billing City': customer.column_8 default "",
+     'Billing State': customer.column_9 default "",
+     'Billing PostalCode': customer.column_10 default "",
+     'Billing Country': customer.column_11 default ""
+
+})
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<file:write doc:name="Write" doc:id="02c7ed7d-a835-4341-8551-ef7e7fe578d0" config-ref="File_Config" path="${file.path}" />
+				<ee:transform doc:name="Transform Message" doc:id="e18c2557-3b82-419f-82b0-71605e3b102e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Customer Successfully Deleted"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="a121cdd9-dd52-4443-9f69-a6daf0a3488a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "No Customer Found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
