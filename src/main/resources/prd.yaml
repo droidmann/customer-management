@@ -1,7 +1,9 @@
 variable: "This is LIVE!!"
 
 file:
-  path: "C:\\Dev\\mule_4_workspace\tests\\src\\main\resources\testing\\Customers-PRD.csv"
+  path: "C:\\Users\\ELITEBOOK\\Documents\\TOPTAL\\Customers-PRD\\Customers-PRD.csv"
   
 http:
   port: "8082"
+
+

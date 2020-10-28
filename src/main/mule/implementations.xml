@@ -19,10 +19,10 @@ payload]]></ee:set-payload>
 output application/java
 import java!com::cms::dartech::MyUtils
 ---
-MyUtils::fileExist("C:\\Dev\\mule_4_workspace\\tests\\src\\main\\resources\\testing\\Customers-QA.csv")]]></ee:set-variable>
+MyUtils::fileExist(Mule::p('file.path'))]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="de57f805-6dd4-454c-852e-348028a6f122" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="de57f805-6dd4-454c-852e-348028a6f122" message="#[vars.isExist]"/>
 		<choice doc:name="Choice" doc:id="5326877f-71ed-456e-b0a0-0b2ec58c69eb" >
 			<when expression="#[vars.isExist == true]">
 				<ee:transform doc:name="Transform Message" doc:id="8061fb45-6ff2-4e65-a17f-f41434261be6" >
@@ -42,7 +42,7 @@ var uniqueId = uuid() replace "-" with ""
 	'BirthDate': birthDate as DateTime as Number,
 	'Height': payload.height default "",
 	'Weight': payload.weight default "",
-	'Billing Street': payload.billingStreet default "",
+	'Billing Street': payload.billingStreet default " ",
 	'Billing City': payload.billingCity,
 	'Billing State': payload.billingState,
 	'Billing Postal Code': payload.billingPostalCode,
@@ -54,7 +54,8 @@ var uniqueId = uuid() replace "-" with ""
 					</ee:message>
 				</ee:transform>
 				<logger level="INFO" doc:name="Logger" doc:id="6b0c927f-6c09-43ea-b129-700feb2a47dd" />
-				<file:write doc:name="Write" doc:id="f9fe28da-5ab5-455b-b31a-5fa232eb8b91" config-ref="File_Config" path="${file.path}" mode="APPEND"/>
+				<file:write doc:name="Write" doc:id="f9fe28da-5ab5-455b-b31a-5fa232eb8b91" config-ref="File_Config" path="${file.path}" mode="APPEND">
+				</file:write>
 				<ee:transform doc:name="Transform Message" doc:id="335f25e4-d70e-4c29-bc01-4f0b78680fe9" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -117,9 +118,28 @@ output application/java
 				</ee:transform>
 			</otherwise>
 		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bdb22ee7-f972-405d-9edd-d5cd430f5cea" type="FILE:ILLEGAL_PATH">
+				<ee:transform doc:name="Transform Message" doc:id="94ed5ee6-645c-40fe-8474-a0f1a8f38260" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Illegal File Path"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 	<flow name="allCustomers" doc:id="8abfe84a-7c44-45cf-ab15-c8a7c687de10" >
 		<file:read doc:name="Read" doc:id="906d6f71-550e-4325-84aa-d64664833736" config-ref="File_Config" path="${file.path}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b11b2213-9da6-464f-9f2c-ff1c917b4f12" message="#[payload]"/>
 		<ee:transform doc:name="Transform Message" doc:id="d248bae1-9f7b-43c5-959c-716a3590d198" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -129,8 +149,9 @@ output application/csv header=false
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e70890d6-3322-4430-bb86-62744c776d2c" message="#[isEmpty(payload)]"/>
 		<choice doc:name="Choice" doc:id="b6de8b9d-4aa3-4532-a0fe-9abcef0f0258" >
-			<when expression="#[payload == []]">
+			<when expression='#[isEmpty(payload)]'>
 				<ee:transform doc:name="Transform Message" doc:id="0c4d4771-50d8-45ea-bba6-24c3e827a2b8" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -182,6 +203,24 @@ output application/java
 		</ee:transform>
 			</otherwise>
 		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="967a2dd5-0320-4b6c-8ae9-4f39dd30b40f" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="f702e5e5-8b91-42e7-903d-a0f011b7d227" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "File does not exist"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 	<flow name="removeCustomer" doc:id="deff313d-7f85-4009-8ac7-c49100a0ffc4" >
 		<set-variable value="#[attributes.queryParams.clientKey]" doc:name="clientKey" doc:id="96a8f202-8b6e-40fb-8b98-4e9f8e14675b" variableName="clientKey"/>
@@ -280,5 +319,23 @@ output application/java
 				</ee:transform>
 			</otherwise>
 		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0fedfccc-de9b-4adb-8b6b-44136aaad2d7" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="cbd47dca-23c1-42f7-8fe8-fa152ff9866b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "File does not exist"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 </mule>
