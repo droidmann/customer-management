@@ -53,7 +53,7 @@ var uniqueId = uuid() replace "-" with ""
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<logger level="INFO" doc:name="Logger" doc:id="6b0c927f-6c09-43ea-b129-700feb2a47dd" />
+				<logger level="INFO" doc:name="Logger" doc:id="6b0c927f-6c09-43ea-b129-700feb2a47dd" message="#[payload]"/>
 				<file:write doc:name="Write" doc:id="f9fe28da-5ab5-455b-b31a-5fa232eb8b91" config-ref="File_Config" path="${file.path}" mode="APPEND">
 				</file:write>
 				<ee:transform doc:name="Transform Message" doc:id="335f25e4-d70e-4c29-bc01-4f0b78680fe9" >
@@ -93,7 +93,7 @@ var uniqueId = uuid() replace "-" with ""
 	'Billing City': payload.billingCity,
 	'Billing State': payload.billingState,
 	'Billing Postal Code': payload.billingPostalCode,
-	'Billing Country': payload.billingCountry,
+	'Billing Country': payload.billingCountry default "",
 	'Created Date': curdate
 	
 	
@@ -203,9 +203,9 @@ output application/java
 		</ee:transform>
 			</otherwise>
 		</choice>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="967a2dd5-0320-4b6c-8ae9-4f39dd30b40f" type="ANY">
-				<ee:transform doc:name="Transform Message" doc:id="f702e5e5-8b91-42e7-903d-a0f011b7d227" >
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ba146603-7fa4-45d0-b3b1-64f0713033f7" >
+				<ee:transform doc:name="Transform Message" doc:id="e3f7e9b4-9a5f-4045-8a2a-3eea45ddbcbc" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -216,10 +216,10 @@ output application/json
 						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
 output application/java
 ---
-500]]></ee:set-variable>
+404]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-			</on-error-propagate>
+			</on-error-continue>
 		</error-handler>
 	</flow>
 	<flow name="removeCustomer" doc:id="deff313d-7f85-4009-8ac7-c49100a0ffc4" >
@@ -319,23 +319,23 @@ output application/java
 				</ee:transform>
 			</otherwise>
 		</choice>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0fedfccc-de9b-4adb-8b6b-44136aaad2d7" type="ANY">
-				<ee:transform doc:name="Transform Message" doc:id="cbd47dca-23c1-42f7-8fe8-fa152ff9866b" >
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="8c50ba3f-31f2-444e-abec-16ce48ea3234" >
+				<ee:transform doc:name="Transform Message" doc:id="993883f8-dcc7-4191-b975-2b01bbff03d3" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "File does not exist"}]]></ee:set-payload>
+{message: "File does not exist."}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables >
 						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
 output application/java
 ---
-500]]></ee:set-variable>
+404]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-			</on-error-propagate>
+			</on-error-continue>
 		</error-handler>
 	</flow>
 </mule>

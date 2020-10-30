@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="customer-management-api-test-suite.xml" />
+	<munit:test name="customer-management-api-test-suite-delete:\customers:customer-management-api-configTest" doc:id="8ab99007-3557-47d2-a6b5-14075c39e20d" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\customers:customer-management-api-config" doc:id="225b1666-d8c4-47f0-a037-0b3b032449f3" name="delete:\customers:customer-management-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="customer-management-api-test-suite-get:\customers:customer-management-api-configTest" doc:id="ea7c7f39-c673-480f-99d3-3208015f3905" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\customers:customer-management-api-config" doc:id="8ef791e1-af5b-4bc4-8f7a-9a47911973f5" name="get:\customers:customer-management-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="customer-management-api-test-suite-post:\customers:application\json:customer-management-api-configTest" doc:id="7411b593-aae3-4010-a46f-d776871d6f11" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\customers:application\json:customer-management-api-config" doc:id="756c370d-18bd-4d65-8588-0851af2d57eb" name="post:\customers:application\json:customer-management-api-config"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>
