@@ -37,7 +37,7 @@ var uniqueId = uuid() replace "-" with ""
 {
 	'Client Key' : "CM" ++ clientkey ++ uniqueId[1 to 5],
 	'First Name': payload.firstName,
-	'Middle Name': payload.middleName default "",
+	'Middle Name': payload.middleName default " ",
 	'Last Name': payload.lastName,
 	'BirthDate': birthDate as DateTime as Number,
 	'Height': payload.height default "",

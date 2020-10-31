@@ -9,19 +9,73 @@
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 	<munit:config name="customer-management-api-test-suite.xml" />
 	<munit:test name="customer-management-api-test-suite-delete:\customers:customer-management-api-configTest" doc:id="8ab99007-3557-47d2-a6b5-14075c39e20d" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ac2cd929-84b9-4cfd-b871-c98df5cd18fb" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Read CSV" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="f6bdb1bf-9b4e-40d3-b47b-d0db580faa67" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="File_Config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${file.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sample/Customers-TST1.csv')]" mediaType="application/csv" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
 		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="36faa074-5607-4600-8a9c-6948000cfeae" >
+				<munit:attributes value="#[attributes.queryParams.clientKey]" />
+			</munit:set-event>
 			<flow-ref doc:name="Flow-ref to delete:\customers:customer-management-api-config" doc:id="225b1666-d8c4-47f0-a037-0b3b032449f3" name="delete:\customers:customer-management-api-config"/>
 		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="b3c0de40-446b-4f13-ba4d-85daaf72e4cf" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
 	</munit:test>
 	<munit:test name="customer-management-api-test-suite-get:\customers:customer-management-api-configTest" doc:id="ea7c7f39-c673-480f-99d3-3208015f3905" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="523a67a4-c443-43b1-b20b-ddf6205b0562" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Read" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="906d6f71-550e-4325-84aa-d64664833736" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="File_Config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${file.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sample/Customers-TST.csv')]" mediaType="application/csv" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
 		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="59f5d138-84de-4b1d-83a6-35dc66d28052" />
 			<flow-ref doc:name="Flow-ref to get:\customers:customer-management-api-config" doc:id="8ef791e1-af5b-4bc4-8f7a-9a47911973f5" name="get:\customers:customer-management-api-config"/>
 		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="28302aa3-fae8-4ae8-a817-d22ca935d231" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
 	</munit:test>
 	<munit:test name="customer-management-api-test-suite-post:\customers:application\json:customer-management-api-configTest" doc:id="7411b593-aae3-4010-a46f-d776871d6f11" description="Test">
 		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="419ab573-8559-4de2-8056-b799e726b70e" >
+				<munit:payload value="{
+  &quot;firstName&quot;: &quot;Jason&quot;,
+  &quot;middleName&quot;: &quot;Omi&quot;,
+  &quot;lastName&quot;: &quot;Eno&quot;,
+  &quot;birthDate&quot;: &quot;1988-09-29&quot;,
+  &quot;height&quot;: &quot;6'6&quot;,
+  &quot;weight&quot;: &quot;78Kg&quot;,
+  &quot;billingStreet&quot;: &quot;23 Addison Hill&quot;,
+  &quot;billingCity&quot;: &quot;Akron&quot;,
+  &quot;billingState&quot;: &quot;OHIO&quot;,
+  &quot;billingPostalCode&quot;: &quot;201992&quot;,
+  &quot;billingCountry&quot;: &quot;USA&quot;
+} " mediaType="application/json" />
+			</munit:set-event>
 			<flow-ref doc:name="Flow-ref to post:\customers:application\json:customer-management-api-config" doc:id="756c370d-18bd-4d65-8588-0851af2d57eb" name="post:\customers:application\json:customer-management-api-config"/>
 		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d8fe84f0-5b91-40d1-8205-b79af8719954" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
 	</munit:test>
 
 
