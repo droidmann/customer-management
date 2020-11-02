@@ -24,7 +24,7 @@
 		</munit:behavior>
 		<munit:execution >
 			<munit:set-event doc:name="Set Event" doc:id="36faa074-5607-4600-8a9c-6948000cfeae" >
-				<munit:attributes value="#[attributes.queryParams.clientKey]" />
+				<munit:attributes value='#[{queryParams:{clientKey:"CM20201031191035235035c9f37"}}]' />
 			</munit:set-event>
 			<flow-ref doc:name="Flow-ref to delete:\customers:customer-management-api-config" doc:id="225b1666-d8c4-47f0-a037-0b3b032449f3" name="delete:\customers:customer-management-api-config"/>
 		</munit:execution>
