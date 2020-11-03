@@ -1,7 +1,7 @@
 variable: "This is Testing"
 
 file:
-  path: "C:\\Users\\ELITEBOOK\\Documents\\TOPTAL\\Customers-QA\\Customers-QA.csv"
+  path: "\\DUMMY_PATH\\TOPTAL\\\\TOPTAL\\Customers-QA\\Customers-QA.csv"
   
 http:
   port: "8081"
